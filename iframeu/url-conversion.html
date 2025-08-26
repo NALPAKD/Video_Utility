@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL to Iframe Converter</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .input-section, .options-section, .output-section {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        textarea, input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .button-group {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .output-area {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .checkbox-container input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+        
+        .info-box {
+            background-color: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .preview-section {
+            margin-top: 20px;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 6px;
+            background-color: #fafafa;
+        }
+        
+        .preview-iframe {
+            width: 100%;
+            border: 1px solid #ccc;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        
+        .url-count {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 URL to Iframe Converter</h1>
+        
+        <div class="info-box">
+            <strong>Instructions:</strong> Paste your URLs (one per line) in the text area below. The tool will generate iframe HTML code for each URL with your specified settings.
+        </div>
+        
+        <div class="input-section">
+            <label for="urlInput">Enter URLs (one per line):</label>
+            <textarea id="urlInput" placeholder="https://example.com&#10;https://another-site.com&#10;https://third-site.org"></textarea>
+            <div class="url-count" id="urlCount">0 URLs detected</div>
+        </div>
+        
+        <div class="options-section">
+            <label>Iframe Options:</label>
+            <div class="options-grid">
+                <div>
+                    <label for="widthInput">Width:</label>
+                    <input type="text" id="widthInput" value="100%" placeholder="e.g., 800px, 100%">
+                </div>
+                <div>
+                    <label for="heightInput">Height:</label>
+                    <input type="text" id="heightInput" value="600px" placeholder="e.g., 400px, 50vh">
+                </div>
+                <div>
+                    <label for="frameborderInput">Frame Border:</label>
+                    <select id="frameborderInput">
+                        <option value="0">0 (No border)</option>
+                        <option value="1">1 (With border)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="sandboxInput">Sandbox:</label>
+                    <input type="text" id="sandboxInput" placeholder="allow-scripts allow-same-origin">
+                </div>
+            </div>
+            
+            <div class="checkbox-container">
+                <input type="checkbox" id="allowFullscreen" checked>
+                <label for="allowFullscreen">Allow Fullscreen</label>
+            </div>
+            
+            <div class="checkbox-container">
+                <input type="checkbox" id="addLoading">
+                <label for="addLoading">Add loading="lazy" attribute</label>
+            </div>
+            
+            <div class="checkbox-container">
+                <input type="checkbox" id="addTitle">
+                <label for="addTitle">Add title attribute (uses domain name)</label>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button onclick="convertToIframes()">🔄 Convert to Iframes</button>
+            <button onclick="copyToClipboard()">📋 Copy HTML</button>
+            <button onclick="clearAll()">🗑️ Clear All</button>
+        </div>
+        
+        <div class="output-section">
+            <label for="outputArea">Generated Iframe HTML:</label>
+            <div class="output-area" id="outputArea">Your iframe HTML will appear here...</div>
+        </div>
+        
+        <div class="preview-section" id="previewSection" style="display: none;">
+            <label>Live Preview:</label>
+            <div id="previewContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        function updateUrlCount() {
+            const input = document.getElementById('urlInput').value.trim();
+            const urls = input ? input.split('\n').filter(line => line.trim() !== '') : [];
+            const count = urls.length;
+            document.getElementById('urlCount').textContent = `${count} URL${count !== 1 ? 's' : ''} detected`;
+        }
+
+        function extractDomain(url) {
+            try {
+                const urlObj = new URL(url);
+                return urlObj.hostname;
+            } catch (e) {
+                return url;
+            }
+        }
+
+        function convertToIframes() {
+            const input = document.getElementById('urlInput').value.trim();
+            const width = document.getElementById('widthInput').value || '100%';
+            const height = document.getElementById('heightInput').value || '600px';
+            const frameborder = document.getElementById('frameborderInput').value;
+            const sandbox = document.getElementById('sandboxInput').value.trim();
+            const allowFullscreen = document.getElementById('allowFullscreen').checked;
+            const addLoading = document.getElementById('addLoading').checked;
+            const addTitle = document.getElementById('addTitle').checked;
+            
+            if (!input) {
+                alert('Please enter at least one URL');
+                return;
+            }
+            
+            const urls = input.split('\n').filter(line => line.trim() !== '');
+            let htmlOutput = '';
+            
+            urls.forEach((url, index) => {
+                url = url.trim();
+                if (!url) return;
+                
+                // Add protocol if missing
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    url = 'https://' + url;
+                }
+                
+                let iframeHtml = '<iframe';
+                iframeHtml += ` src="${url}"`;
+                iframeHtml += ` width="${width}"`;
+                iframeHtml += ` height="${height}"`;
+                iframeHtml += ` frameborder="${frameborder}"`;
+                
+                if (sandbox) {
+                    iframeHtml += ` sandbox="${sandbox}"`;
+                }
+                
+                if (allowFullscreen) {
+                    iframeHtml += ' allowfullscreen';
+                }
+                
+                if (addLoading) {
+                    iframeHtml += ' loading="lazy"';
+                }
+                
+                if (addTitle) {
+                    const domain = extractDomain(url);
+                    iframeHtml += ` title="${domain}"`;
+                }
+                
+                iframeHtml += '></iframe>';
+                
+                htmlOutput += iframeHtml;
+                if (index < urls.length - 1) {
+                    htmlOutput += '\n\n';
+                }
+            });
+            
+            document.getElementById('outputArea').textContent = htmlOutput;
+            
+            // Show preview
+            showPreview(htmlOutput);
+        }
+
+        function showPreview(html) {
+            const previewContainer = document.getElementById('previewContainer');
+            const previewSection = document.getElementById('previewSection');
+            
+            // Clear previous previews
+            previewContainer.innerHTML = '';
+            
+            // Create preview iframes (limit to first 3 for performance)
+            const iframes = html.split('\n\n').slice(0, 3);
+            iframes.forEach((iframeHtml, index) => {
+                if (iframeHtml.trim()) {
+                    const div = document.createElement('div');
+                    div.innerHTML = `<p><strong>Preview ${index + 1}:</strong></p>` + iframeHtml;
+                    div.style.marginBottom = '20px';
+                    previewContainer.appendChild(div);
+                }
+            });
+            
+            if (html.split('\n\n').length > 3) {
+                const note = document.createElement('p');
+                note.textContent = `... and ${html.split('\n\n').length - 3} more iframe(s)`;
+                note.style.fontStyle = 'italic';
+                note.style.color = '#666';
+                previewContainer.appendChild(note);
+            }
+            
+            previewSection.style.display = 'block';
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('outputArea').textContent;
+            if (!output || output === 'Your iframe HTML will appear here...') {
+                alert('Please convert URLs to iframes first');
+                return;
+            }
+            
+            navigator.clipboard.writeText(output).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            }).catch(() => {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = output;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        function clearAll() {
+            document.getElementById('urlInput').value = '';
+            document.getElementById('outputArea').textContent = 'Your iframe HTML will appear here...';
+            document.getElementById('previewSection').style.display = 'none';
+            updateUrlCount();
+        }
+
+        // Add event listener for URL count
+        document.getElementById('urlInput').addEventListener('input', updateUrlCount);
+        
+        // Initialize
+        updateUrlCount();
+    </script>
+</body>
+</html>

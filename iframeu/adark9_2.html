@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Theme - Video Categories</title>
+     
+   <style>
+
+
+
+       /* Exciting Dark Theme */
+body {
+    font-family: 'Raleway', sans-serif; /* Stylish and modern */
+    background-color: #0D0D0D; /* Deep black for high contrast */
+    color: #EDEDED; /* Softer white for readability */
+    text-align: center;
+}
+
+/* Header Styling */
+h1, h2 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: bold;
+    font-size: 2em;
+    color: #FFD700; /* Bright gold for emphasis */
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+/* Container for two-column layout */
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+// Generate selection buttons
+document.getElementById('jsonSelection').innerHTML = jsonFiles.map(file =>
+    `<button onclick="loadJSON('${file}')">${file}</button>`
+).join("")
+
+
+/* Video Items */
+.item {
+    width: 45%;
+    padding: 15px;
+    box-sizing: border-box;
+    background-color: #1E1E1E; /* Slightly lighter black */
+    border-radius: 10px;
+    margin: 10px;
+    padding: 20px;
+    text-align: left;
+    box-shadow: 0px 4px 8px rgba(255, 215, 0, 0.4); /* Gold glow */
+}
+
+/* Category Buttons */
+.buttons button {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.2em;
+    font-weight: 600;
+    background: linear-gradient(45deg, #FF4500, #FFD700);
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: transform 0.2s, background 0.3s;
+}
+
+.buttons button:hover {
+    background: linear-gradient(45deg, #FFD700, #FF4500);
+    transform: scale(1.05);
+}
+
+/* Navigation Buttons */
+.nav-buttons button {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.1em;
+    font-weight: 600;
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: transform 0.2s, background 0.3s;
+}
+
+.nav-buttons button:hover {
+    background-color: #FFD700;
+    color: #121212;
+    transform: scale(1.1);
+}
+		
+  .item {
+    width: 45%;
+    padding: 15px;
+    box-sizing: border-box;
+    background-color: #1E1E1E; /* Slightly lighter black */
+    border-radius: 10px;
+    margin: 10px;
+    padding: 20px;
+    text-align: left;
+    box-shadow: 0px 4px 8px rgba(255, 215, 0, 0.4); /* Gold glow */
+}
+
+    </style>
+</head>	
+<body
+
+    <h1>Choose a Category</h1>
+    <div class="buttons" id="categoryButtons">Loading categories...</div>
+
+    <h2>Results</h2>
+    <div class="nav-buttons">
+        <button onclick="previousPage()">Previous</button>
+        <button onclick="nextPage()">Next</button>
+    <
+    </div>
+
+    <div id="results" class="container">Select a category to view videos.</div>
+<h2 id="selectedCategory">Results</h2>
+
+
+    <script>
+        let jsonData = [];
+        let categories = new Set();
+        let filteredResults = [];
+        let currentPage = 0;
+        const recordsPerPage = 10;
+
+function loadJSON(file) {
+    fetch(`http://localhost:8080/json_data/${file}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log("Loaded JSON Data:", data);
+            processData(data);
+        })
+        .catch(error => console.error("Error fetching JSON:", error));
+}
+
+// Example function to process JSON data (customize based on your needs)
+function processData(data) {
+    document.getElementById('results').innerHTML = JSON.stringify(data, null, 2);
+}
+        // Fetch JSON Data
+        fetch('data1.json')
+            .then(response => response.json())
+            .then(data => {
+                jsonData = Array.isArray(data) ? data : [];
+
+                // Extract unique categories
+                jsonData.forEach(item => {
+                    if (item.category) categories.add(item.category);
+                });
+
+                // Generate category buttons dynamically
+                document.getElementById('categoryButtons').innerHTML = 
+                    [...categories].map(category => 
+                        `<button onclick="filterCategory('${category}')">${category}</button>`
+                    ).join("");
+            })
+            .catch(error => {
+                console.error('Error fetching JSON:', error);
+                document.getElementById('categoryButtons').textContent = 'Failed to load categories.';
+            });
+
+        // Function to filter JSON data by category and store results
+        
+		
+		function filterCategory(selectedCategory) {
+    		filteredResults = jsonData.filter(item => item.category === 	selectedCategory);
+			currentPage = 0; // Reset to first page
+
+         // Update selected category name
+            document.getElementById('selectedCategory').textContent = `Category: ${selectedCategory}`;
+
+            displayPage();
+}
+
+        // Function to display a set of records
+        function displayPage() {
+            const start = currentPage * recordsPerPage;
+            const end = start + recordsPerPage;
+            const pageResults = filteredResults.slice(start, end);
+
+            let displayContent = pageResults.map(item => 
+                `<div class="item"><h2>${item.title}</h2>${item.iframe}</div>`
+            ).join("");
+
+            document.getElementById('results').innerHTML = displayContent || "<p>No results found.</p>";
+        }
+
+        // Go to the next page
+        function nextPage() {
+            if ((currentPage + 1) * recordsPerPage < filteredResults.length) {
+                currentPage++;
+                displayPage();
+            }
+        }
+
+        // Go to the previous page
+        function previousPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                displayPage();
+                
+            }
+        }
+    </script>
+
+</body>
+</html>

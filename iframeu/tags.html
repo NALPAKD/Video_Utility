@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data - Tag Selection</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .container-custom {
+            max-width: 800px;
+            margin-top: 100px;
+        }
+        
+        .card-custom {
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .card-header-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
+            border: none;
+        }
+        
+        .dropdown-custom {
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .dropdown-custom:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .status-card {
+            background: rgba(40, 167, 69, 0.1);
+            border: 2px solid #28a745;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .error-card {
+            background: rgba(220, 53, 69, 0.1);
+            border: 2px solid #dc3545;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .info-card {
+            background: rgba(0, 123, 255, 0.1);
+            border: 2px solid #007bff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .fade-in {
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container container-custom">
+        <div class="card card-custom fade-in">
+            <div class="card-header card-header-custom">
+                <h3 class="mb-0">
+                    <i class="bi bi-tags-fill me-2"></i>
+                    Tag Selection
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <!-- CSV File Input -->
+                <div class="mb-4">
+                    <label for="csvFile" class="form-label">
+                        <i class="bi bi-file-earmark-csv me-2"></i>
+                        Select tag2.csv file:
+                    </label>
+                    <input type="file" class="form-control dropdown-custom" id="csvFile" accept=".csv" />
+                    <small class="text-muted">Select your tag2.csv file to populate the dropdown</small>
+                </div>
+
+                <!-- Tag Dropdown -->
+                <div class="mb-4">
+                    <label for="tagSelect" class="form-label">
+                        <i class="bi bi-tag me-2"></i>
+                        Select a tag:
+                    </label>
+                    <select class="form-select dropdown-custom" id="tagSelect" disabled>
+                        <option value="">Please load CSV file first...</option>
+                    </select>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <button type="button" class="btn btn-primary btn-custom" id="saveBtn" disabled>
+                        <i class="bi bi-save me-2"></i>
+                        Save Selection
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-custom" id="loadBtn">
+                        <i class="bi bi-arrow-clockwise me-2"></i>
+                        Load Saved
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-custom" id="clearBtn">
+                        <i class="bi bi-trash me-2"></i>
+                        Clear Saved
+                    </button>
+                </div>
+
+                <!-- Status Display -->
+                <div id="statusDisplay"></div>
+
+                <!-- Stored Value Display -->
+                <div class="info-card" id="storedValueCard" style="display: none;">
+                    <h5><i class="bi bi-bookmark-check me-2"></i>Currently Stored Value:</h5>
+                    <p class="mb-0" id="storedValue"></p>
+                    <small class="text-muted">This value is saved in browser storage and can be used by other pages</small>
+                </div>
+
+                <!-- Instructions -->
+                <div class="info-card mt-4">
+                    <h5><i class="bi bi-info-circle me-2"></i>Instructions:</h5>
+                    <ol class="mb-0">
+                        <li>Click "Choose File" and select your tag2.csv file</li>
+                        <li>Select a tag from the dropdown menu</li>
+                        <li>Click "Save Selection" to store the value</li>
+                        <li>The stored value will be available for other pages to use</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // Global variables
+        let csvData = [];
+        const tagSelect = document.getElementById('tagSelect');
+        const saveBtn = document.getElementById('saveBtn');
+        const loadBtn = document.getElementById('loadBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const statusDisplay = document.getElementById('statusDisplay');
+        const storedValueCard = document.getElementById('storedValueCard');
+        const storedValue = document.getElementById('storedValue');
+        const csvFile = document.getElementById('csvFile');
+
+        // Storage key for localStorage
+        const STORAGE_KEY = 'selectedTag';
+
+        // Load CSV file
+        csvFile.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file && file.type === 'text/csv') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        parseCSV(e.target.result);
+                        showStatus('CSV file loaded successfully!', 'success');
+                    } catch (error) {
+                        showStatus('Error reading CSV file: ' + error.message, 'error');
+                    }
+                };
+                reader.readAsText(file);
+            } else {
+                showStatus('Please select a valid CSV file', 'error');
+            }
+        });
+
+        // Parse CSV data
+        function parseCSV(csvText) {
+            const lines = csvText.trim().split('\n');
+            csvData = [];
+            
+            // Skip header if it exists (check if first line is "tag")
+            const startIndex = lines[0].toLowerCase().trim() === 'tag' ? 1 : 0;
+            
+            for (let i = startIndex; i < lines.length; i++) {
+                const tag = lines[i].trim().replace(/"/g, ''); // Remove quotes
+                if (tag && tag !== '') {
+                    csvData.push(tag);
+                }
+            }
+            
+            // Remove duplicates and sort
+            csvData = [...new Set(csvData)].sort();
+            
+            populateDropdown();
+        }
+
+        // Populate dropdown with CSV data
+        function populateDropdown() {
+            tagSelect.innerHTML = '<option value="">-- Select a tag --</option>';
+            
+            csvData.forEach(tag => {
+                const option = document.createElement('option');
+                option.value = tag;
+                option.textContent = tag;
+                tagSelect.appendChild(option);
+            });
+            
+            tagSelect.disabled = false;
+            updateSaveButton();
+        }
+
+        // Update save button state
+        function updateSaveButton() {
+            saveBtn.disabled = tagSelect.value === '';
+        }
+
+        // Save selected value to localStorage
+        function saveSelection() {
+            const selectedTag = tagSelect.value;
+            if (selectedTag) {
+                try {
+                    localStorage.setItem(STORAGE_KEY, selectedTag);
+                    showStatus(`Tag "${selectedTag}" saved successfully!`, 'success');
+                    displayStoredValue();
+                } catch (error) {
+                    showStatus('Error saving selection: ' + error.message, 'error');
+                }
+            }
+        }
+
+        // Load saved value from localStorage
+        function loadSavedValue() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    tagSelect.value = saved;
+                    showStatus(`Loaded saved tag: "${saved}"`, 'success');
+                    updateSaveButton();
+                } else {
+                    showStatus('No saved tag found', 'info');
+                }
+                displayStoredValue();
+            } catch (error) {
+                showStatus('Error loading saved value: ' + error.message, 'error');
+            }
+        }
+
+        // Clear saved value
+        function clearSavedValue() {
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+                showStatus('Saved tag cleared', 'success');
+                displayStoredValue();
+            } catch (error) {
+                showStatus('Error clearing saved value: ' + error.message, 'error');
+            }
+        }
+
+        // Display currently stored value
+        function displayStoredValue() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                storedValue.textContent = saved;
+                storedValueCard.style.display = 'block';
+            } else {
+                storedValueCard.style.display = 'none';
+            }
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const statusClass = type === 'success' ? 'status-card' : 
+                              type === 'error' ? 'error-card' : 'info-card';
+            const icon = type === 'success' ? 'check-circle' : 
+                        type === 'error' ? 'exclamation-triangle' : 'info-circle';
+            
+            statusDisplay.innerHTML = `
+                <div class="${statusClass}">
+                    <i class="bi bi-${icon} me-2"></i>
+                    ${message}
+                </div>
+            `;
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                statusDisplay.innerHTML = '';
+            }, 5000);
+        }
+
+        // Event listeners
+        tagSelect.addEventListener('change', updateSaveButton);
+        saveBtn.addEventListener('click', saveSelection);
+        loadBtn.addEventListener('click', loadSavedValue);
+        clearBtn.addEventListener('click', clearSavedValue);
+
+        // Function for other pages to access stored value
+        window.getStoredTag = function() {
+            return localStorage.getItem(STORAGE_KEY);
+        };
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            displayStoredValue();
+        });
+    </script>
+</body>
+</html>
