@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iframe Utility Hub</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .hero-section {
+            padding: 80px 0 60px;
+            text-align: center;
+            color: white;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .hero-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .utility-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 20px;
+            padding: 2rem;
+            height: 280px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .utility-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            color: inherit;
+            text-decoration: none;
+        }
+        
+        .utility-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .icon-convert {
+            background: var(--primary-gradient);
+        }
+        
+        .icon-viewer {
+            background: var(--secondary-gradient);
+        }
+        
+        .icon-category {
+            background: var(--success-gradient);
+        }
+        
+        .icon-tag {
+            background: var(--warning-gradient);
+        }
+        
+        .utility-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        
+        .utility-description {
+            color: #6c757d;
+            line-height: 1.6;
+        }
+        
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: #f8f9fa !important;
+        }
+        
+        .container-custom {
+            max-width: 1200px;
+        }
+        
+        .fade-in {
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .card-row {
+            animation-delay: 0.2s;
+        }
+        
+        .card-row .col-md-6:nth-child(1) { animation-delay: 0.1s; }
+        .card-row .col-md-6:nth-child(2) { animation-delay: 0.2s; }
+        .card-row .col-md-6:nth-child(3) { animation-delay: 0.3s; }
+        .card-row .col-md-6:nth-child(4) { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-window-stack me-2"></i>
+                Iframe Utility Hub
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#utilities">Utilities</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <div class="container container-custom">
+            <div class="fade-in">
+                <h1 class="hero-title">
+                    <i class="bi bi-window-stack me-3"></i>
+                    Iframe Utility Hub
+                </h1>
+                <p class="hero-subtitle">
+                    Professional iframe management tools for developers and content creators
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Utilities Section -->
+    <section id="utilities" class="py-5">
+        <div class="container container-custom">
+            <div class="row g-4 card-row">
+                <!-- URL Conversion Utility -->
+                <div class="col-lg-6 col-md-6 fade-in">
+                    <a href="iframeu/url-conversion.html" class="utility-card">
+                        <div class="utility-icon icon-convert mx-auto">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </div>
+                        <h3 class="utility-title">URL Conversion</h3>
+                        <p class="utility-description">
+                            Convert and transform URLs for iframe integration. Perfect for cleaning and optimizing your iframe sources.
+                        </p>
+                    </a>
+                </div>
+
+                <!-- Iframe Viewer -->
+                <div class="col-lg-6 col-md-6 fade-in">
+                    <a href="iframeu/iframe-viewer.html" class="utility-card">
+                        <div class="utility-icon icon-viewer mx-auto">
+                            <i class="bi bi-eye"></i>
+                        </div>
+                        <h3 class="utility-title">Iframe Viewer</h3>
+                        <p class="utility-description">
+                            Preview and test iframes in a safe environment. View content, check responsiveness, and debug issues.
+                        </p>
+                    </a>
+                </div>
+
+                <!-- Category Sorting -->
+                <div class="col-lg-6 col-md-6 fade-in">
+                    <a href="iframeu/iframe-sorted-category.html" class="utility-card">
+                        <div class="utility-icon icon-category mx-auto">
+                            <i class="bi bi-folder-fill"></i>
+                        </div>
+                        <h3 class="utility-title">Category Sorting</h3>
+                        <p class="utility-description">
+                            Organize and browse iframes by categories. Efficient categorization for better content management.
+                        </p>
+                    </a>
+                </div>
+
+                <!-- Tag Sorting -->
+                <div class="col-lg-6 col-md-6 fade-in">
+                    <a href="iframeu/iframe-sorted-tag.html" class="utility-card">
+                        <div class="utility-icon icon-tag mx-auto">
+                            <i class="bi bi-tags-fill"></i>
+                        </div>
+                        <h3 class="utility-title">Tag Sorting</h3>
+                        <p class="utility-description">
+                            Filter and sort iframes by tags. Advanced tagging system for precise content organization and discovery.
+                        </p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-white">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 Iframe Utility Hub. Professional iframe management solutions.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add click animation to cards
+        document.querySelectorAll('.utility-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all cards for animation
+        document.querySelectorAll('.col-md-6').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
