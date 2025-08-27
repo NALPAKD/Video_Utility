@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Organizer & Playlist Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #1e3c72;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        input, select, button {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, #2a5298, #1e3c72);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(42, 82, 152, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: #1e3c72;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+
+        .groups-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .group {
+            margin-bottom: 25px;
+            border: 2px solid #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .group:hover {
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .group-header {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .group-header:hover {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+        }
+
+        .group-title {
+            font-weight: 700;
+            font-size: 1.2em;
+            color: #1e3c72;
+        }
+
+        .group-count {
+            background: #2a5298;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .group-content {
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .group-content.collapsed {
+            display: none;
+        }
+
+        .file-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s ease;
+        }
+
+        .file-item:hover {
+            background: rgba(42, 82, 152, 0.05);
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .file-details {
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 0.8em;
+            border-radius: 6px;
+        }
+
+        .btn-playlist {
+            background: #28a745;
+            border: none;
+            color: white;
+        }
+
+        .btn-playlist:hover {
+            background: #218838;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+
+        .playlist-section {
+            margin-bottom: 30px;
+        }
+
+        .playlist-section h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .playlist {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .playlist:hover {
+            border-color: #2a5298;
+            transform: translateX(5px);
+        }
+
+        .playlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .playlist-name {
+            font-weight: 600;
+            color: #1e3c72;
+        }
+
+        .playlist-count {
+            background: #6c757d;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
+        }
+
+        .playlist-items {
+            font-size: 0.8em;
+            color: #666;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+
+        .search-highlight {
+            background: yellow;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Media Organizer & Playlist Manager</h1>
+            <p>Organize your media files into smart groups and create custom playlists</p>
+            <div id="loadStatus" style="margin-top: 10px; font-weight: 600;"></div>
+            
+            <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.7); border-radius: 10px;">
+                <label style="display: block; margin-bottom: 10px; font-weight: 600;">📁 Upload your CSV file to see all files:</label>
+                <input type="file" id="csvUpload" accept=".csv" style="margin-bottom: 10px;">
+                <button onclick="handleCSVUpload()" style="padding: 10px 20px; font-size: 14px;">Load CSV File</button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="groupBy">Group By:</label>
+                <select id="groupBy">
+                    <option value="extension">File Extension</option>
+                    <option value="name">Similar Names</option>
+                    <option value="size">File Size</option>
+                    <option value="year">Year Modified</option>
+                    <option value="month">Month Modified</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="maxGroupSize">Max Group Size:</label>
+                <input type="number" id="maxGroupSize" value="10" min="1" max="100">
+            </div>
+            <div class="control-group">
+                <label for="searchFilter">Search Filter:</label>
+                <input type="text" id="searchFilter" placeholder="Filter files...">
+            </div>
+            <div class="control-group">
+                <label>&nbsp;</label>
+                <button onclick="organizeFiles()">🔄 Reorganize</button>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalFiles">0</div>
+                <div class="stat-label">Total Files</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalGroups">0</div>
+                <div class="stat-label">Groups</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalPlaylists">0</div>
+                <div class="stat-label">Playlists</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalSize">0 GB</div>
+                <div class="stat-label">Total Size</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="groups-container">
+                <div id="groupsList">
+                    <div class="empty-state">
+                        <div style="font-size: 4em; margin-bottom: 20px;">📁</div>
+                        <h3>No groups yet</h3>
+                        <p>Click "Reorganize" to group your files</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="playlist-section">
+                    <h3>🎵 Create Playlist</h3>
+                    <div class="control-group">
+                        <input type="text" id="newPlaylistName" placeholder="Playlist name...">
+                        <button onclick="createPlaylist()">Create Playlist</button>
+                    </div>
+                </div>
+
+                <div class="playlist-section">
+                    <h3>📋 My Playlists</h3>
+                    <div id="playlistsList">
+                        <div class="empty-state" style="padding: 20px;">
+                            <div style="font-size: 2em; margin-bottom: 10px;">🎵</div>
+                            <p>No playlists yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Handle CSV file upload through browser
+        function handleCSVUpload() {
+            const fileInput = document.getElementById('csvUpload');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a CSV file first');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csvContent = e.target.result;
+                const lines = csvContent.trim().split('\n');
+                const loadedFiles = [];
+                
+                document.getElementById('loadStatus').innerHTML = '<span style="color: blue;">⏳ Processing CSV file...</span>';
+                
+                lines.forEach((line, index) => {
+                    try {
+                        let cleanLine = line.trim();
+                        cleanLine = cleanLine.replace(/^"*\{/, '{').replace(/\}"*\r?$/, '}');
+                        cleanLine = cleanLine.replace(/""/g, '"');
+                        
+                        const nameMatch = cleanLine.match(/name: "?([^"]*)"?/);
+                        const pathMatch = cleanLine.match(/path: "?([^"]*)"?/);
+                        const sizeMatch = cleanLine.match(/size: (\d+)/);
+                        const modifiedMatch = cleanLine.match(/modified: "?([^"]*)"?/);
+                        
+                        if (nameMatch && pathMatch && sizeMatch && modifiedMatch) {
+                            const dateParts = modifiedMatch[1].split('/');
+                            const formattedDate = `${dateParts[2]}-${dateParts[0].padStart(2, '0')}-${dateParts[1].padStart(2, '0')}`;
+                            
+                            loadedFiles.push({
+                                name: nameMatch[1],
+                                path: pathMatch[1],
+                                size: parseInt(sizeMatch[1]),
+                                dateModified: formattedDate
+                            });
+                        }
+                    } catch (error) {
+                        console.log(`Error parsing line ${index + 1}:`, error.message);
+                    }
+                });
+                
+                if (loadedFiles.length > 0) {
+                    mediaFiles = loadedFiles;
+                    console.log(`✅ Loaded ${mediaFiles.length} files from uploaded CSV`);
+                    document.getElementById('loadStatus').innerHTML = `<span style="color: green;">✅ Successfully loaded ${mediaFiles.length} files from your CSV!</span>`;
+                    organizeFiles();
+                } else {
+                    document.getElementById('loadStatus').innerHTML = '<span style="color: red;">❌ Could not parse any files from the CSV</span>';
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // Your actual CSV data (pre-loaded from analysis)
+        let mediaFiles = [
+            {name: "000F8FD.mp4", path: "X:\\Videos\\All Videos", size: 9436370, dateModified: "2025-07-26"},
+            {name: "0012E6E.mp4", path: "X:\\2025\\VideoDownloader", size: 77329395, dateModified: "2025-01-12"},
+            {name: "001A77E-720p.mp4", path: "X:\\2025\\VideoDownloader", size: 22318337, dateModified: "2025-01-12"},
+            {name: "001c8d5e203e58be3bc100552baf7f3e1652269927-962-360-1033-h264.mp4", path: "X:\\Videos\\All Videos", size: 3435115, dateModified: "2025-08-10"},
+            {name: "001DD8E.mp4", path: "X:\\2025\\VideoDownloader", size: 265563934, dateModified: "2025-01-12"},
+            {name: "0023F4D-720p.mp4", path: "X:\\2025\\VideoDownloader", size: 20428772, dateModified: "2025-01-12"},
+            {name: "0024E7F.mp4", path: "X:\\2025\\VideoDownloader", size: 54397488, dateModified: "2025-01-12"},
+            {name: "0025B31-720p.mp4", path: "X:\\2025\\VideoDownloader", size: 10832030, dateModified: "2025-01-12"},
+            {name: "002CDE7-720p.mp4", path: "X:\\2025\\VideoDownloader", size: 22001344, dateModified: "2025-01-12"},
+            {name: "0030E0B-720p.mp4", path: "X:\\2025\\VideoDownloader", size: 32844043, dateModified: "2025-01-12"},
+            {name: "003296A-720p.mp4", path: "X:\\2025\\VideoDownloader", size: 21504887, dateModified: "2025-01-12"},
+            {name: "003506E.mp4", path: "X:\\2025\\VideoDownloader", size: 49783664, dateModified: "2025-01-12"},
+            {name: "0041BC8-720p.mp4", path: "X:\\2025\\VideoDownloader", size: 12756509, dateModified: "2025-01-12"},
+            {name: "004336B-720p.mp4", path: "X:\\2025\\VideoDownloader", size: 22020969, dateModified: "2025-01-12"},
+            {name: "00459DC.mp4", path: "X:\\2025\\VideoDownloader", size: 46651007, dateModified: "2025-01-12"},
+            {name: "004F3AE.mp4", path: "X:\\2025\\VideoDownloader", size: 88779552, dateModified: "2025-01-12"},
+            {name: "005298F-720p.mp4", path: "X:\\2025\\VideoDownloader", size: 22297471, dateModified: "2025-01-12"},
+            {name: "0052E1C.mp4", path: "X:\\2025\\VideoDownloader", size: 78892352, dateModified: "2025-01-12"},
+            {name: "0054B84-720p.mp4", path: "X:\\2025\\VideoDownloader", size: 17701883, dateModified: "2025-01-12"},
+            {name: "00589D8-720p.mp4", path: "X:\\2025\\VideoDownloader", size: 15439615, dateModified: "2025-01-12"},
+            {name: "005B9AF.mp4", path: "X:\\2025\\VideoDownloader", size: 71503344, dateModified: "2025-01-12"},
+            {name: "005E6CD.mp4", path: "X:\\2025\\VideoDownloader", size: 47806480, dateModified: "2025-01-12"},
+            {name: "0065A62-720p.mp4", path: "X:\\2025\\VideoDownloader", size: 22298719, dateModified: "2025-01-12"},
+            {name: "00693E8.mp4", path: "X:\\2025\\VideoDownloader", size: 35886320, dateModified: "2025-01-12"},
+            {name: "006B7FD-720p.mp4", path: "X:\\2025\\VideoDownloader", size: 7728383, dateModified: "2025-01-12"},
+            {name: "006D90A-720p.mp4", path: "X:\\2025\\VideoDownloader", size: 22308351, dateModified: "2025-01-12"},
+            {name: "Example_Video.avi", path: "X:\\Videos\\Older", size: 125834752, dateModified: "2025-03-15"},
+            {name: "Sample_3GP.3gp", path: "X:\\Mobile\\Videos", size: 3456789, dateModified: "2025-04-20"},
+            {name: "Test_Movie.mkv", path: "X:\\Movies", size: 1547293568, dateModified: "2025-02-28"},
+            {name: "Demo_Flash.swf", path: "X:\\Flash\\Old", size: 876543, dateModified: "2025-01-05"}
+        ];
+
+        // Function to load full CSV data if file is uploaded
+        async function loadCSVData() {
+            try {
+                const fileContent = await window.fs.readFile('result1.csv', { encoding: 'utf8' });
+                const lines = fileContent.trim().split('\n');
+                const loadedFiles = [];
+                
+                lines.forEach((line, index) => {
+                    try {
+                        let cleanLine = line.trim();
+                        cleanLine = cleanLine.replace(/^"*\{/, '{').replace(/\}"*\r?$/, '}');
+                        cleanLine = cleanLine.replace(/""/g, '"');
+                        
+                        const nameMatch = cleanLine.match(/name: "?([^"]*)"?/);
+                        const pathMatch = cleanLine.match(/path: "?([^"]*)"?/);
+                        const sizeMatch = cleanLine.match(/size: (\d+)/);
+                        const modifiedMatch = cleanLine.match(/modified: "?([^"]*)"?/);
+                        
+                        if (nameMatch && pathMatch && sizeMatch && modifiedMatch) {
+                            const dateParts = modifiedMatch[1].split('/');
+                            const formattedDate = `${dateParts[2]}-${dateParts[0].padStart(2, '0')}-${dateParts[1].padStart(2, '0')}`;
+                            
+                            loadedFiles.push({
+                                name: nameMatch[1],
+                                path: pathMatch[1],
+                                size: parseInt(sizeMatch[1]),
+                                dateModified: formattedDate
+                            });
+                        }
+                    } catch (error) {
+                        console.log(`Error parsing line ${index + 1}:`, error.message);
+                    }
+                });
+                
+                if (loadedFiles.length > 0) {
+                    mediaFiles = loadedFiles;
+                    console.log(`✅ Loaded ${mediaFiles.length} files from CSV`);
+                    document.getElementById('loadStatus').innerHTML = `<span style="color: green;">✅ Loaded ${mediaFiles.length} files from CSV</span>`;
+                } else {
+                    console.log("❌ No files loaded from CSV, using sample data");
+                    document.getElementById('loadStatus').innerHTML = `<span style="color: orange;">⚠️ Using sample data (${mediaFiles.length} files)</span>`;
+                }
+                
+                organizeFiles();
+            } catch (error) {
+                console.log('❌ Could not load CSV file:', error.message);
+                document.getElementById('loadStatus').innerHTML = `<span style="color: orange;">⚠️ Using sample data (${mediaFiles.length} files) - Upload CSV to see all files</span>`;
+                organizeFiles();
+            }
+        }
+
+        let currentGroups = [];
+        let playlists = [];
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
+            if (bytes < 1024 * 1024 * 1024) return Math.round(bytes / (1024 * 1024)) + ' MB';
+            return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString();
+        }
+
+        function getFileExtension(filename) {
+            return filename.split('.').pop().toLowerCase();
+        }
+
+        function getYear(dateString) {
+            return new Date(dateString).getFullYear().toString();
+        }
+
+        function getMonth(dateString) {
+            const date = new Date(dateString);
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        function getSizeCategory(size) {
+            if (size < 1000000) return 'Small (< 1MB)';
+            if (size < 50000000) return 'Medium (< 50MB)';
+            if (size < 200000000) return 'Large (< 200MB)';
+            return 'Very Large (200MB+)';
+        }
+
+        function calculateSimilarity(str1, str2) {
+            const longer = str1.length > str2.length ? str1 : str2;
+            const shorter = str1.length > str2.length ? str2 : str1;
+            
+            if (longer.length === 0) return 1.0;
+            
+            const editDistance = levenshteinDistance(longer, shorter);
+            return (longer.length - editDistance) / longer.length;
+        }
+
+        function levenshteinDistance(str1, str2) {
+            const matrix = Array(str2.length + 1).fill().map(() => Array(str1.length + 1).fill(0));
+            
+            for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
+            for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
+            
+            for (let j = 1; j <= str2.length; j++) {
+                for (let i = 1; i <= str1.length; i++) {
+                    const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+                    matrix[j][i] = Math.min(
+                        matrix[j - 1][i] + 1,
+                        matrix[j][i - 1] + 1,
+                        matrix[j - 1][i - 1] + cost
+                    );
+                }
+            }
+            
+            return matrix[str2.length][str1.length];
+        }
+
+        function groupByName(files, maxGroupSize) {
+            const groups = [];
+            const processed = new Set();
+            const threshold = 0.6;
+            
+            files.forEach((file, index) => {
+                if (processed.has(index)) return;
+                
+                const group = [file];
+                processed.add(index);
+                
+                files.forEach((otherFile, otherIndex) => {
+                    if (processed.has(otherIndex)) return;
+                    
+                    const similarity = calculateSimilarity(
+                        file.name.toLowerCase(),
+                        otherFile.name.toLowerCase()
+                    );
+                    
+                    if (similarity >= threshold) {
+                        group.push(otherFile);
+                        processed.add(otherIndex);
+                    }
+                });
+                
+                groups.push({
+                    name: `Similar to "${file.name}"`,
+                    files: group
+                });
+            });
+            
+            return subdivideByDate(groups, maxGroupSize);
+        }
+
+        function subdivideByDate(groups, maxGroupSize) {
+            const result = [];
+            
+            groups.forEach(group => {
+                if (group.files.length <= maxGroupSize) {
+                    result.push(group);
+                } else {
+                    // Subdivide by year first, then by month if needed
+                    const yearGroups = {};
+                    
+                    group.files.forEach(file => {
+                        const year = getYear(file.dateModified);
+                        if (!yearGroups[year]) yearGroups[year] = [];
+                        yearGroups[year].push(file);
+                    });
+                    
+                    Object.keys(yearGroups).forEach(year => {
+                        if (yearGroups[year].length <= maxGroupSize) {
+                            result.push({
+                                name: `${group.name} (${year})`,
+                                files: yearGroups[year]
+                            });
+                        } else {
+                            // Further subdivide by month
+                            const monthGroups = {};
+                            yearGroups[year].forEach(file => {
+                                const month = getMonth(file.dateModified);
+                                if (!monthGroups[month]) monthGroups[month] = [];
+                                monthGroups[month].push(file);
+                            });
+                            
+                            Object.keys(monthGroups).forEach(month => {
+                                result.push({
+                                    name: `${group.name} (${month})`,
+                                    files: monthGroups[month]
+                                });
+                            });
+                        }
+                    });
+                }
+            });
+            
+            return result;
+        }
+
+        function organizeFiles() {
+            const groupBy = document.getElementById('groupBy').value;
+            const maxGroupSize = parseInt(document.getElementById('maxGroupSize').value);
+            const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
+            
+            // Filter files based on search
+            let filteredFiles = mediaFiles.filter(file => 
+                file.name.toLowerCase().includes(searchFilter) ||
+                file.path.toLowerCase().includes(searchFilter)
+            );
+            
+            let groups = [];
+            
+            switch (groupBy) {
+                case 'extension':
+                    const extGroups = {};
+                    filteredFiles.forEach(file => {
+                        const ext = getFileExtension(file.name);
+                        if (!extGroups[ext]) extGroups[ext] = [];
+                        extGroups[ext].push(file);
+                    });
+                    
+                    Object.keys(extGroups).forEach(ext => {
+                        groups.push({
+                            name: `${ext.toUpperCase()} Files`,
+                            files: extGroups[ext]
+                        });
+                    });
+                    groups = subdivideByDate(groups, maxGroupSize);
+                    break;
+                    
+                case 'name':
+                    groups = groupByName(filteredFiles, maxGroupSize);
+                    break;
+                    
+                case 'size':
+                    const sizeGroups = {};
+                    filteredFiles.forEach(file => {
+                        const category = getSizeCategory(file.size);
+                        if (!sizeGroups[category]) sizeGroups[category] = [];
+                        sizeGroups[category].push(file);
+                    });
+                    
+                    Object.keys(sizeGroups).forEach(category => {
+                        groups.push({
+                            name: category,
+                            files: sizeGroups[category]
+                        });
+                    });
+                    groups = subdivideByDate(groups, maxGroupSize);
+                    break;
+                    
+                case 'year':
+                    const yearGroups = {};
+                    filteredFiles.forEach(file => {
+                        const year = getYear(file.dateModified);
+                        if (!yearGroups[year]) yearGroups[year] = [];
+                        yearGroups[year].push(file);
+                    });
+                    
+                    Object.keys(yearGroups).forEach(year => {
+                        groups.push({
+                            name: `Year ${year}`,
+                            files: yearGroups[year]
+                        });
+                    });
+                    break;
+                    
+                case 'month':
+                    const monthGroups = {};
+                    filteredFiles.forEach(file => {
+                        const month = getMonth(file.dateModified);
+                        if (!monthGroups[month]) monthGroups[month] = [];
+                        monthGroups[month].push(file);
+                    });
+                    
+                    Object.keys(monthGroups).forEach(month => {
+                        groups.push({
+                            name: `${month}`,
+                            files: monthGroups[month]
+                        });
+                    });
+                    break;
+            }
+            
+            currentGroups = groups;
+            renderGroups();
+            updateStats();
+        }
+
+        function renderGroups() {
+            const groupsList = document.getElementById('groupsList');
+            const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
+            
+            if (currentGroups.length === 0) {
+                groupsList.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 4em; margin-bottom: 20px;">📁</div>
+                        <h3>No files found</h3>
+                        <p>Try adjusting your search filter</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            groupsList.innerHTML = currentGroups.map((group, groupIndex) => `
+                <div class="group">
+                    <div class="group-header" onclick="toggleGroup(${groupIndex})">
+                        <div class="group-title">${group.name}</div>
+                        <div class="group-count">${group.files.length} files</div>
+                    </div>
+                    <div class="group-content" id="group-${groupIndex}">
+                        ${group.files.map((file, fileIndex) => `
+                            <div class="file-item">
+                                <div class="file-info">
+                                    <div class="file-name">${highlightSearch(file.name, searchFilter)}</div>
+                                    <div class="file-details">
+                                        ${file.path} • ${formatFileSize(file.size)} • ${formatDate(file.dateModified)}
+                                    </div>
+                                </div>
+                                <div class="file-actions">
+                                    <button class="btn-small btn-playlist" onclick="addToPlaylist(${groupIndex}, ${fileIndex})">
+                                        + Playlist
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function highlightSearch(text, search) {
+            if (!search) return text;
+            const regex = new RegExp(`(${search})`, 'gi');
+            return text.replace(regex, '<span class="search-highlight">$1</span>');
+        }
+
+        function toggleGroup(groupIndex) {
+            const content = document.getElementById(`group-${groupIndex}`);
+            content.classList.toggle('collapsed');
+        }
+
+        function addToPlaylist(groupIndex, fileIndex) {
+            const file = currentGroups[groupIndex].files[fileIndex];
+            
+            if (playlists.length === 0) {
+                alert('Please create a playlist first!');
+                return;
+            }
+            
+            // For demo, add to the first playlist
+            playlists[0].files.push(file);
+            renderPlaylists();
+            updateStats();
+            
+            // Show success feedback
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '✓ Added';
+            button.style.background = '#28a745';
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.background = '';
+            }, 1000);
+        }
+
+        function createPlaylist() {
+            const nameInput = document.getElementById('newPlaylistName');
+            const name = nameInput.value.trim();
+            
+            if (!name) {
+                alert('Please enter a playlist name');
+                return;
+            }
+            
+            playlists.push({
+                name: name,
+                files: [],
+                created: new Date().toISOString()
+            });
+            
+            nameInput.value = '';
+            renderPlaylists();
+            updateStats();
+        }
+
+        function renderPlaylists() {
+            const playlistsList = document.getElementById('playlistsList');
+            
+            if (playlists.length === 0) {
+                playlistsList.innerHTML = `
+                    <div class="empty-state" style="padding: 20px;">
+                        <div style="font-size: 2em; margin-bottom: 10px;">🎵</div>
+                        <p>No playlists yet</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            playlistsList.innerHTML = playlists.map((playlist, index) => `
+                <div class="playlist">
+                    <div class="playlist-header">
+                        <div class="playlist-name">${playlist.name}</div>
+                        <div class="playlist-count">${playlist.files.length}</div>
+                    </div>
+                    <div class="playlist-items">
+                        ${playlist.files.length === 0 ? 
+                            '<em>No files added yet</em>' : 
+                            playlist.files.slice(0, 3).map(file => file.name).join('<br>') +
+                            (playlist.files.length > 3 ? '<br><em>...and ' + (playlist.files.length - 3) + ' more</em>' : '')
+                        }
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
+            const filteredFiles = mediaFiles.filter(file => 
+                file.name.toLowerCase().includes(searchFilter) ||
+                file.path.toLowerCase().includes(searchFilter)
+            );
+            
+            const totalSize = filteredFiles.reduce((sum, file) => sum + file.size, 0);
+            const totalPlaylistFiles = playlists.reduce((sum, playlist) => sum + playlist.files.length, 0);
+            
+            document.getElementById('totalFiles').textContent = filteredFiles.length;
+            document.getElementById('totalGroups').textContent = currentGroups.length;
+            document.getElementById('totalPlaylists').textContent = playlists.length;
+            document.getElementById('totalSize').textContent = (totalSize / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+        }
+
+        // Event listeners
+        document.getElementById('searchFilter').addEventListener('input', organizeFiles);
+        document.getElementById('groupBy').addEventListener('change', organizeFiles);
+        document.getElementById('maxGroupSize').addEventListener('change', organizeFiles);
+
+        // Initialize the app
+        window.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('loadStatus').innerHTML = `<span style="color: orange;">⚠️ Showing sample data (${mediaFiles.length} files) - Upload your CSV to see all 995 files</span>`;
+            loadCSVData();
+        });
+    </script>
+</body>
+</html>
