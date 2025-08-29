@@ -675,56 +675,79 @@
             return ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'wma'].includes(ext);
         }
 
+        function convertToHttpUrl(file) {
+            // Convert Windows paths to HTTP URLs
+            let httpUrl = '';
+            
+            if (file.path.includes('X:\\Videos\\All Videos')) {
+                httpUrl = `http://localhost/videos/${file.name}`;
+            } else if (file.path.includes('X:\\2025\\VideoDownloader')) {
+                httpUrl = `http://localhost/downloads/${file.name}`;
+            } else {
+                // Generic mapping - adjust paths as needed
+                const pathSegment = file.path.replace(/[\\:]/g, '/').replace('X:/', '');
+                httpUrl = `http://localhost/${pathSegment}/${file.name}`;
+            }
+            
+            return httpUrl;
+        }
+
         function generateVideoPreview(container, file, fullPath, extension) {
+            const httpUrl = convertToHttpUrl(file);
+            
             container.innerHTML = `
-                <div class="preview-unavailable">
-                    <div class="file-icon">🎬</div>
-                    <h3>${file.name}</h3>
-                    <p style="margin: 15px 0;">Video File (${extension.toUpperCase()})</p>
-                    <p style="color: #6c757d; font-size: 0.9em;">
-                        Direct file access is not available in browser environment.<br>
-                        To preview videos, copy files to a web server directory.
+                <video controls class="video-preview" style="max-width: 100%; max-height: 500px;">
+                    <source src="${httpUrl}" type="video/${extension === 'mov' ? 'quicktime' : extension}">
+                    <p style="color: #dc3545; margin-top: 20px;">
+                        Video cannot be loaded. Make sure your web server is running and files are accessible at:<br>
+                        <code>${httpUrl}</code>
                     </p>
-                    <div style="margin-top: 20px; padding: 15px; background: rgba(23,162,184,0.1); border-radius: 10px;">
-                        <strong>File Location:</strong><br>
-                        <code style="font-size: 0.8em; word-break: break-all;">${fullPath}</code>
-                    </div>
+                </video>
+                <div style="margin-top: 15px; text-align: center;">
+                    <a href="${httpUrl}" target="_blank" style="color: #2a5298; text-decoration: none; font-weight: 600;">
+                        🔗 Open in New Tab
+                    </a>
                 </div>
             `;
         }
 
         function generateImagePreview(container, file, fullPath) {
+            const httpUrl = convertToHttpUrl(file);
+            
             container.innerHTML = `
-                <div class="preview-unavailable">
-                    <div class="file-icon">🖼️</div>
-                    <h3>${file.name}</h3>
-                    <p style="margin: 15px 0;">Image File</p>
-                    <p style="color: #6c757d; font-size: 0.9em;">
-                        Direct file access is not available in browser environment.<br>
-                        To preview images, copy files to a web server directory.
-                    </p>
-                    <div style="margin-top: 20px; padding: 15px; background: rgba(23,162,184,0.1); border-radius: 10px;">
-                        <strong>File Location:</strong><br>
-                        <code style="font-size: 0.8em; word-break: break-all;">${fullPath}</code>
-                    </div>
+                <img src="${httpUrl}" class="image-preview" 
+                     style="max-width: 100%; max-height: 500px; border-radius: 10px;"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="display: none; text-align: center; color: #dc3545; margin-top: 20px;">
+                    Image cannot be loaded. Make sure your web server is running and files are accessible at:<br>
+                    <code>${httpUrl}</code>
+                </div>
+                <div style="margin-top: 15px; text-align: center;">
+                    <a href="${httpUrl}" target="_blank" style="color: #2a5298; text-decoration: none; font-weight: 600;">
+                        🔗 Open in New Tab
+                    </a>
                 </div>
             `;
         }
 
         function generateAudioPreview(container, file, fullPath) {
+            const httpUrl = convertToHttpUrl(file);
+            
             container.innerHTML = `
-                <div class="preview-unavailable">
+                <div style="text-align: center; margin-bottom: 20px;">
                     <div class="file-icon">🎵</div>
-                    <h3>${file.name}</h3>
-                    <p style="margin: 15px 0;">Audio File</p>
-                    <p style="color: #6c757d; font-size: 0.9em;">
-                        Direct file access is not available in browser environment.<br>
-                        To preview audio, copy files to a web server directory.
+                    <h4>${file.name}</h4>
+                </div>
+                <audio controls class="audio-preview" style="width: 100%;">
+                    <source src="${httpUrl}" type="audio/${getFileExtension(file.name)}">
+                    <p style="color: #dc3545;">
+                        Audio cannot be loaded. Make sure your web server is running and files are accessible.
                     </p>
-                    <div style="margin-top: 20px; padding: 15px; background: rgba(23,162,184,0.1); border-radius: 10px;">
-                        <strong>File Location:</strong><br>
-                        <code style="font-size: 0.8em; word-break: break-all;">${fullPath}</code>
-                    </div>
+                </audio>
+                <div style="margin-top: 15px; text-align: center;">
+                    <a href="${httpUrl}" target="_blank" style="color: #2a5298; text-decoration: none; font-weight: 600;">
+                        🔗 Open in New Tab
+                    </a>
                 </div>
             `;
         }
