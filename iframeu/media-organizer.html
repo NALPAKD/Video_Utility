@@ -317,6 +317,159 @@
             border-radius: 3px;
         }
 
+        /* Preview Modal Styles */
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            overflow: auto;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .preview-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .preview-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+
+        .preview-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #1e3c72;
+            margin: 0;
+        }
+
+        .preview-close {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .preview-close:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .preview-body {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .preview-media {
+            text-align: center;
+        }
+
+        .preview-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .preview-info h4 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .info-value {
+            color: #6c757d;
+            text-align: right;
+            max-width: 150px;
+            word-break: break-all;
+        }
+
+        .video-preview {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .audio-preview {
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .file-icon {
+            font-size: 6em;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        .preview-unavailable {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .btn-preview {
+            background: #17a2b8;
+            border: none;
+            color: white;
+        }
+
+        .btn-preview:hover {
+            background: #138496;
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -328,6 +481,15 @@
             
             .stats {
                 grid-template-columns: repeat(2, 1fr);
+            }
+
+            .preview-body {
+                grid-template-columns: 1fr;
+            }
+            
+            .preview-content {
+                max-width: 95vw;
+                padding: 20px;
             }
         }
     </style>
@@ -421,9 +583,227 @@
                 </div>
             </div>
         </div>
+
+        <!-- Preview Modal -->
+        <div id="previewModal" class="preview-modal">
+            <div class="preview-content">
+                <div class="preview-header">
+                    <h3 class="preview-title" id="previewTitle">File Preview</h3>
+                    <button class="preview-close" onclick="closePreview()">✕</button>
+                </div>
+                <div class="preview-body">
+                    <div class="preview-media" id="previewMedia">
+                        <!-- Media content will be inserted here -->
+                    </div>
+                    <div class="preview-info">
+                        <h4>File Information</h4>
+                        <div id="previewFileInfo">
+                            <!-- File info will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        // Preview functionality
+        function previewFile(groupIndex, fileIndex) {
+            const file = currentGroups[groupIndex].files[fileIndex];
+            const modal = document.getElementById('previewModal');
+            const title = document.getElementById('previewTitle');
+            const mediaContainer = document.getElementById('previewMedia');
+            const infoContainer = document.getElementById('previewFileInfo');
+            
+            title.textContent = file.name;
+            
+            // Clear previous content
+            mediaContainer.innerHTML = '';
+            
+            // Get file extension
+            const extension = getFileExtension(file.name).toLowerCase();
+            const fullPath = `${file.path}\\${file.name}`;
+            
+            // Generate preview based on file type
+            if (isVideoFile(extension)) {
+                generateVideoPreview(mediaContainer, file, fullPath, extension);
+            } else if (isImageFile(extension)) {
+                generateImagePreview(mediaContainer, file, fullPath);
+            } else if (isAudioFile(extension)) {
+                generateAudioPreview(mediaContainer, file, fullPath);
+            } else {
+                generateGenericPreview(mediaContainer, file, extension);
+            }
+            
+            // Generate file info
+            generateFileInfo(infoContainer, file, extension);
+            
+            // Show modal
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePreview() {
+            const modal = document.getElementById('previewModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+            
+            // Stop any playing media
+            const videos = modal.querySelectorAll('video');
+            const audios = modal.querySelectorAll('audio');
+            
+            videos.forEach(video => {
+                video.pause();
+                video.currentTime = 0;
+            });
+            
+            audios.forEach(audio => {
+                audio.pause();
+                audio.currentTime = 0;
+            });
+        }
+
+        function isVideoFile(ext) {
+            return ['mp4', 'avi', 'mov', 'mkv', 'wmv', 'flv', '3gp', 'ts', 'webm'].includes(ext);
+        }
+
+        function isImageFile(ext) {
+            return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'tiff', 'ico'].includes(ext);
+        }
+
+        function isAudioFile(ext) {
+            return ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'wma'].includes(ext);
+        }
+
+        function generateVideoPreview(container, file, fullPath, extension) {
+            container.innerHTML = `
+                <div class="preview-unavailable">
+                    <div class="file-icon">🎬</div>
+                    <h3>${file.name}</h3>
+                    <p style="margin: 15px 0;">Video File (${extension.toUpperCase()})</p>
+                    <p style="color: #6c757d; font-size: 0.9em;">
+                        Direct file access is not available in browser environment.<br>
+                        To preview videos, copy files to a web server directory.
+                    </p>
+                    <div style="margin-top: 20px; padding: 15px; background: rgba(23,162,184,0.1); border-radius: 10px;">
+                        <strong>File Location:</strong><br>
+                        <code style="font-size: 0.8em; word-break: break-all;">${fullPath}</code>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateImagePreview(container, file, fullPath) {
+            container.innerHTML = `
+                <div class="preview-unavailable">
+                    <div class="file-icon">🖼️</div>
+                    <h3>${file.name}</h3>
+                    <p style="margin: 15px 0;">Image File</p>
+                    <p style="color: #6c757d; font-size: 0.9em;">
+                        Direct file access is not available in browser environment.<br>
+                        To preview images, copy files to a web server directory.
+                    </p>
+                    <div style="margin-top: 20px; padding: 15px; background: rgba(23,162,184,0.1); border-radius: 10px;">
+                        <strong>File Location:</strong><br>
+                        <code style="font-size: 0.8em; word-break: break-all;">${fullPath}</code>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateAudioPreview(container, file, fullPath) {
+            container.innerHTML = `
+                <div class="preview-unavailable">
+                    <div class="file-icon">🎵</div>
+                    <h3>${file.name}</h3>
+                    <p style="margin: 15px 0;">Audio File</p>
+                    <p style="color: #6c757d; font-size: 0.9em;">
+                        Direct file access is not available in browser environment.<br>
+                        To preview audio, copy files to a web server directory.
+                    </p>
+                    <div style="margin-top: 20px; padding: 15px; background: rgba(23,162,184,0.1); border-radius: 10px;">
+                        <strong>File Location:</strong><br>
+                        <code style="font-size: 0.8em; word-break: break-all;">${fullPath}</code>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateGenericPreview(container, file, extension) {
+            const icon = getFileIcon(extension);
+            container.innerHTML = `
+                <div class="preview-unavailable">
+                    <div class="file-icon">${icon}</div>
+                    <h3>${file.name}</h3>
+                    <p style="margin: 15px 0;">${extension.toUpperCase()} File</p>
+                    <p style="color: #6c757d; font-size: 0.9em;">
+                        File type: ${extension.toUpperCase()}<br>
+                        Preview not available for this file type.
+                    </p>
+                </div>
+            `;
+        }
+
+        function getFileIcon(extension) {
+            const icons = {
+                'mp4': '🎬', 'avi': '🎬', 'mov': '🎬', 'mkv': '🎬', 'wmv': '🎬', 'flv': '🎬', '3gp': '🎬',
+                'mp3': '🎵', 'wav': '🎵', 'flac': '🎵', 'aac': '🎵', 'ogg': '🎵',
+                'jpg': '🖼️', 'jpeg': '🖼️', 'png': '🖼️', 'gif': '🖼️', 'bmp': '🖼️',
+                'txt': '📄', 'doc': '📄', 'pdf': '📄',
+                'zip': '📦', 'rar': '📦', '7z': '📦',
+                'swf': '🎮', 'exe': '⚙️'
+            };
+            return icons[extension] || '📄';
+        }
+
+        function generateFileInfo(container, file, extension) {
+            const fileSize = formatFileSize(file.size);
+            const fileDate = formatDate(file.dateModified);
+            const fullPath = `${file.path}\\${file.name}`;
+            
+            container.innerHTML = `
+                <div class="info-row">
+                    <span class="info-label">Name:</span>
+                    <span class="info-value">${file.name}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Type:</span>
+                    <span class="info-value">${extension.toUpperCase()}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Size:</span>
+                    <span class="info-value">${fileSize}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Modified:</span>
+                    <span class="info-value">${fileDate}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Path:</span>
+                    <span class="info-value" style="font-size: 0.7em;">${file.path}</span>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: rgba(30,60,114,0.1); border-radius: 10px;">
+                    <strong style="color: #1e3c72;">Full Path:</strong><br>
+                    <code style="font-size: 0.7em; word-break: break-all; color: #495057;">${fullPath}</code>
+                </div>
+            `;
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('previewModal');
+            if (event.target === modal) {
+                closePreview();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closePreview();
+            }
+        });
+
         // Handle CSV file upload through browser
         function handleCSVUpload() {
             const fileInput = document.getElementById('csvUpload');
@@ -831,6 +1211,9 @@
                                     </div>
                                 </div>
                                 <div class="file-actions">
+                                    <button class="btn-small btn-preview" onclick="previewFile(${groupIndex}, ${fileIndex})">
+                                        👁 Preview
+                                    </button>
                                     <button class="btn-small btn-playlist" onclick="addToPlaylist(${groupIndex}, ${fileIndex})">
                                         + Playlist
                                     </button>
