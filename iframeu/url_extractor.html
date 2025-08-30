@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Extractor Utility</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .input-section, .output-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            color: #667eea;
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .input-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f0f0f0;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 12px 20px;
+            background: #f0f0f0;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .file-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            text-align: center;
+            background: rgba(102, 126, 234, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 10px;
+        }
+
+        .option-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        label {
+            font-weight: 600;
+            color: #555;
+            cursor: pointer;
+        }
+
+        .extract-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .extract-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .url-count {
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-secondary {
+            padding: 8px 15px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        .url-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+
+        .url-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s ease;
+        }
+
+        .url-item:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .url-item:last-child {
+            border-bottom: none;
+        }
+
+        .url-text {
+            flex: 1;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+            color: #495057;
+        }
+
+        .url-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: 15px;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s ease;
+        }
+
+        .btn-small:hover {
+            background: #5a67d8;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .options {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>URL Extractor</h1>
+            <p>Extract and organize URLs from any document or text</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">Input Document</h2>
+                
+                <div class="input-tabs">
+                    <button class="tab-button active" onclick="switchTab(this, 'text')">Paste Text</button>
+                    <button class="tab-button" onclick="switchTab(this, 'file')">Upload File</button>
+                </div>
+
+                <div class="tab-content active" id="text-tab">
+                    <textarea id="textInput" placeholder="Paste your document text here..."></textarea>
+                </div>
+
+                <div class="tab-content" id="file-tab">
+                    <div class="file-input" onclick="document.getElementById('fileInput').click()">
+                        <input type="file" id="fileInput" accept=".txt,.html,.htm,.xml,.json,.csv,.md" onchange="handleFileUpload()">
+                        <div style="font-size: 1.2em; margin-bottom: 10px;">📄</div>
+                        <div>Click to select a file</div>
+                        <div style="font-size: 0.8em; color: #666; margin-top: 5px;">
+                            Supports: HTML, TXT, XML, JSON, CSV, MD
+                        </div>
+                    </div>
+                    <div id="fileName" style="margin-top: 10px; font-weight: 600; color: #667eea;"></div>
+                </div>
+
+                <div class="options">
+                    <div class="option-group">
+                        <input type="checkbox" id="includeHttp" checked>
+                        <label for="includeHttp">HTTP/HTTPS URLs</label>
+                    </div>
+                    <div class="option-group">
+                        <input type="checkbox" id="includeHref" checked>
+                        <label for="includeHref">HTML href links</label>
+                    </div>
+                    <div class="option-group">
+                        <input type="checkbox" id="includeFtp">
+                        <label for="includeFtp">FTP URLs</label>
+                    </div>
+                    <div class="option-group">
+                        <input type="checkbox" id="includeEmail">
+                        <label for="includeEmail">Email addresses</label>
+                    </div>
+                    <div class="option-group">
+                        <input type="checkbox" id="includeWww">
+                        <label for="includeWww">www domains</label>
+                    </div>
+                    <div class="option-group">
+                        <input type="checkbox" id="removeDuplicates" checked>
+                        <label for="removeDuplicates">Remove duplicates</label>
+                    </div>
+                    <div class="option-group">
+                        <input type="checkbox" id="sortResults" checked>
+                        <label for="sortResults">Sort results</label>
+                    </div>
+                    <div class="option-group">
+                        <input type="checkbox" id="includeRelative">
+                        <label for="includeRelative">Relative URLs</label>
+                    </div>
+                </div>
+
+                <button class="extract-button" onclick="extractUrls()">Extract URLs</button>
+            </div>
+
+            <div class="output-section">
+                <h2 class="section-title">Extracted URLs</h2>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalUrls">0</div>
+                        <div class="stat-label">Total URLs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="uniqueUrls">0</div>
+                        <div class="stat-label">Unique URLs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="domainCount">0</div>
+                        <div class="stat-label">Domains</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-secondary" onclick="copyAllUrls()">Copy All</button>
+                    <button class="btn-secondary" onclick="exportToFile()">Export TXT</button>
+                    <button class="btn-secondary" onclick="clearResults()">Clear</button>
+                </div>
+
+                <div class="url-list" id="urlList">
+                    <div class="empty-state">
+                        <div style="font-size: 3em; margin-bottom: 15px;">🔍</div>
+                        <h3>No URLs extracted yet</h3>
+                        <p>Enter text or upload a file to get started</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let extractedUrls = [];
+
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the app after DOM is loaded
+            updateStats(0, 0, 0);
+        });
+
+        function switchTab(buttonElement, tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            buttonElement.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            const targetTab = document.getElementById(tabName + '-tab');
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
+        }
+
+        function handleFileUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            const fileNameElement = document.getElementById('fileName');
+            const textInput = document.getElementById('textInput');
+            
+            if (!file || !fileNameElement || !textInput) return;
+
+            fileNameElement.textContent = `Selected: ${file.name}`;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                textInput.value = e.target.result;
+            };
+            reader.readAsText(file);
+        }
+
+        function extractUrls() {
+            const textInput = document.getElementById('textInput');
+            if (!textInput) {
+                alert('Error: Cannot find text input element');
+                return;
+            }
+
+            const text = textInput.value;
+            
+            if (!text.trim()) {
+                alert('Please enter some text or upload a file first');
+                return;
+            }
+
+            const patterns = [];
+            let urls = [];
+
+            // Get checkbox states
+            const httpCheckbox = document.getElementById('includeHttp');
+            const hrefCheckbox = document.getElementById('includeHref');
+            const ftpCheckbox = document.getElementById('includeFtp');
+            const emailCheckbox = document.getElementById('includeEmail');
+            const wwwCheckbox = document.getElementById('includeWww');
+            const relativeCheckbox = document.getElementById('includeRelative');
+            const removeDuplicatesCheckbox = document.getElementById('removeDuplicates');
+            const sortResultsCheckbox = document.getElementById('sortResults');
+
+            // Standard HTTP/HTTPS URLs
+            if (httpCheckbox && httpCheckbox.checked) {
+                patterns.push(/https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi);
+            }
+
+            // HTML href attribute extraction
+            if (hrefCheckbox && hrefCheckbox.checked) {
+                // Match href attributes in anchor tags
+                const hrefMatches = text.match(/<a[^>]+href\s*=\s*["']([^"']+)["'][^>]*>/gi);
+                if (hrefMatches) {
+                    hrefMatches.forEach(match => {
+                        const hrefValue = match.match(/href\s*=\s*["']([^"']+)["']/i);
+                        if (hrefValue && hrefValue[1]) {
+                            urls.push(hrefValue[1]);
+                        }
+                    });
+                }
+
+                // Also look for href attributes without full anchor tags
+                const hrefPattern = /href\s*=\s*["']([^"']+)["']/gi;
+                let hrefMatch;
+                while ((hrefMatch = hrefPattern.exec(text)) !== null) {
+                    urls.push(hrefMatch[1]);
+                }
+            }
+
+            // FTP URLs
+            if (ftpCheckbox && ftpCheckbox.checked) {
+                patterns.push(/ftp:\/\/[^\s<>"{}|\\^`\[\]]+/gi);
+            }
+
+            // Email addresses
+            if (emailCheckbox && emailCheckbox.checked) {
+                patterns.push(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gi);
+            }
+
+            // www domains
+            if (wwwCheckbox && wwwCheckbox.checked) {
+                patterns.push(/www\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/[^\s<>"{}|\\^`\[\]]*)?/gi);
+            }
+
+            // Relative URLs (paths starting with / or ./ or ../)
+            if (relativeCheckbox && relativeCheckbox.checked) {
+                patterns.push(/(?:\.\.?\/|\/)[^\s<>"{}|\\^`\[\]']+/gi);
+            }
+
+            // Extract URLs using regex patterns
+            patterns.forEach(pattern => {
+                const matches = text.match(pattern);
+                if (matches) {
+                    urls = urls.concat(matches);
+                }
+            });
+
+            // Clean and process URLs
+            urls = urls.map(url => {
+                // Remove HTML entities
+                url = url.replace(/&amp;/g, '&')
+                         .replace(/&lt;/g, '<')
+                         .replace(/&gt;/g, '>')
+                         .replace(/&quot;/g, '"')
+                         .replace(/&#39;/g, "'");
+                
+                // Trim and remove trailing punctuation
+                return url.trim().replace(/[.,;:!?]+$/, '');
+            });
+
+            // Filter out empty URLs
+            urls = urls.filter(url => url.length > 0);
+
+            // Remove duplicates if requested
+            if (removeDuplicatesCheckbox && removeDuplicatesCheckbox.checked) {
+                urls = [...new Set(urls)];
+            }
+
+            // Sort results if requested
+            if (sortResultsCheckbox && sortResultsCheckbox.checked) {
+                urls.sort();
+            }
+
+            extractedUrls = urls;
+            displayResults();
+        }
+
+        function displayResults() {
+            const urlList = document.getElementById('urlList');
+            
+            if (!urlList) {
+                console.error('Cannot find URL list element');
+                return;
+            }
+            
+            if (extractedUrls.length === 0) {
+                urlList.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 3em; margin-bottom: 15px;">❌</div>
+                        <h3>No URLs found</h3>
+                        <p>Try adjusting your extraction options</p>
+                    </div>
+                `;
+                updateStats(0, 0, 0);
+                return;
+            }
+
+            const uniqueDomains = new Set();
+            
+            urlList.innerHTML = extractedUrls.map((url, index) => {
+                // Extract domain for statistics
+                try {
+                    let domain;
+                    if (url.includes('@')) {
+                        domain = url.split('@')[1];
+                    } else {
+                        const urlObj = new URL(url.startsWith('www.') ? 'http://' + url : url);
+                        domain = urlObj.hostname;
+                    }
+                    uniqueDomains.add(domain);
+                } catch (e) {
+                    // Handle malformed URLs - extract basic domain pattern
+                    const domainMatch = url.match(/(?:https?:\/\/)?(?:www\.)?([^\/\s]+)/);
+                    if (domainMatch) {
+                        uniqueDomains.add(domainMatch[1]);
+                    }
+                }
+
+                // Escape URL for safe HTML attributes
+                const escapedUrl = url.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+
+                return `
+                    <div class="url-item">
+                        <div class="url-text">${url}</div>
+                        <div class="url-actions">
+                            <button class="btn-small" onclick="copyUrl('${escapedUrl}')">Copy</button>
+                            <button class="btn-small" onclick="openUrl('${escapedUrl}')">Open</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateStats(extractedUrls.length, extractedUrls.length, uniqueDomains.size);
+        }
+
+        function updateStats(total, unique, domains) {
+            const totalElement = document.getElementById('totalUrls');
+            const uniqueElement = document.getElementById('uniqueUrls');
+            const domainElement = document.getElementById('domainCount');
+            
+            if (totalElement) totalElement.textContent = total;
+            if (uniqueElement) uniqueElement.textContent = unique;
+            if (domainElement) domainElement.textContent = domains;
+        }
+
+        function copyUrl(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                // Visual feedback
+                const button = event.target;
+                if (button) {
+                    const originalText = button.textContent;
+                    const originalBackground = button.style.background;
+                    
+                    button.textContent = 'Copied!';
+                    button.style.background = '#28a745';
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.style.background = originalBackground;
+                    }, 1000);
+                }
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy URL to clipboard');
+            });
+        }
+
+        function openUrl(url) {
+            let fullUrl = url;
+            if (!url.startsWith('http') && !url.includes('@')) {
+                fullUrl = 'http://' + url;
+            } else if (url.includes('@')) {
+                fullUrl = 'mailto:' + url;
+            }
+            window.open(fullUrl, '_blank');
+        }
+
+        function copyAllUrls() {
+            if (extractedUrls.length === 0) {
+                alert('No URLs to copy');
+                return;
+            }
+
+            const urlText = extractedUrls.join('\n');
+            navigator.clipboard.writeText(urlText).then(() => {
+                alert(`Copied ${extractedUrls.length} URLs to clipboard`);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy URLs to clipboard');
+            });
+        }
+
+        function exportToFile() {
+            if (extractedUrls.length === 0) {
+                alert('No URLs to export');
+                return;
+            }
+
+            const urlText = extractedUrls.join('\n');
+            const blob = new Blob([urlText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'extracted-urls.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function clearResults() {
+            extractedUrls = [];
+            displayResults();
+            
+            const textInput = document.getElementById('textInput');
+            const fileName = document.getElementById('fileName');
+            const fileInput = document.getElementById('fileInput');
+            
+            if (textInput) textInput.value = '';
+            if (fileName) fileName.textContent = '';
+            if (fileInput) fileInput.value = '';
+        }
+    </script>
+</body>
+</html>
