@@ -502,7 +502,16 @@
             <div id="loadStatus" style="margin-top: 10px; font-weight: 600;"></div>
             
             <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.7); border-radius: 10px;">
-                <label style="display: block; margin-bottom: 10px; font-weight: 600;">📁 Upload your CSV file to see all files:</label>
+                <label style="display: block; margin-bottom: 10px; font-weight: 600;">📁 Select a folder to scan for media files:</label>
+                <input type="file" id="folderInput" webkitdirectory directory multiple style="margin-bottom: 10px;">
+                <button onclick="handleFolderSelection()" style="padding: 10px 20px; font-size: 14px;">Scan Folder</button>
+                <p style="font-size: 0.8em; color: #666; margin: 10px 0;">
+                    This will scan the selected folder and all its subfolders for media files
+                </p>
+                
+                <hr style="margin: 15px 0; border: 1px solid #ddd;">
+                
+                <label style="display: block; margin-bottom: 10px; font-weight: 600;">📄 Or upload a CSV file (alternative):</label>
                 <input type="file" id="csvUpload" accept=".csv" style="margin-bottom: 10px;">
                 <button onclick="handleCSVUpload()" style="padding: 10px 20px; font-size: 14px;">Load CSV File</button>
             </div>
@@ -1356,8 +1365,8 @@
 
         // Initialize the app
         window.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('loadStatus').innerHTML = `<span style="color: orange;">⚠️ Showing sample data (${mediaFiles.length} files) - Upload your CSV to see all 995 files</span>`;
-            loadCSVData();
+            document.getElementById('loadStatus').innerHTML = `<span style="color: orange;">⚠️ Showing sample data (${mediaFiles.length} files) - Select a folder above to scan your actual files</span>`;
+            organizeFiles(); // Start with sample data
         });
     </script>
 </body>
